@@ -31,6 +31,9 @@ class MainClass(metaclass=ProxyMeta):
     def main_method(self):
         print(self.ADDITIONAL_INFO)
 
+# Output:
+# This is the main class
+# This is the proxy class
 # Usage:
 obj = MainClass()
 obj.main_method()
