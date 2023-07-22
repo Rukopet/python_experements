@@ -1,15 +1,13 @@
 import functools
 
-CHECK = True
+ENABLE_PROXY = True
 
-class MetaProxy(type):
+class ProxyMeta(type):
     def __new__(cls, name, bases, dct):
-
-        if CHECK:
-            # create an empthy class
-            proxy_class = type('EmptyClass', (), {'SOMETHING': "it's class B"})()
+        if ENABLE_PROXY:
+            proxy_class = type('ProxyClass', (), {'ADDITIONAL_INFO': "This is the proxy class"})()
             for attr_name, attr_value in dct.items():
-                if attr_name not in ('SOMETHING'):
+                if attr_name != 'ADDITIONAL_INFO':
                     setattr(proxy_class, attr_name, attr_value)
                 if callable(attr_value) and not attr_name.startswith('__') and not attr_name.startswith('_'):
                     dct[attr_name] = cls.create_method_wrapper(proxy_class, attr_name, attr_value)
@@ -20,24 +18,19 @@ class MetaProxy(type):
     def create_method_wrapper(cls, proxy_class, method_name, method):
         @functools.wraps(method)
         def wrapper(self, *args, **kwargs):
-            method_a = method
-            method_a(self, *args, **kwargs)
-            method_b = getattr(proxy_class, method_name)
-            method_b(proxy_class, *args, **kwargs)
+            original_method = method
+            original_method(self, *args, **kwargs)
+            proxy_method = getattr(proxy_class, method_name)
+            proxy_method(proxy_class, *args, **kwargs)
             return
         return wrapper
 
+class MainClass(metaclass=ProxyMeta):
+    ADDITIONAL_INFO = "This is the main class"
 
-class A(metaclass=MetaProxy):
-    SOMETHING = "it's class A"
+    def main_method(self):
+        print(self.ADDITIONAL_INFO)
 
-    def do(self):
-        print(self.SOMETHING)
-
-
-# output
-# it's class A
-# it's class B
-a = A()
-a.do()
-
+# Usage:
+obj = MainClass()
+obj.main_method()
