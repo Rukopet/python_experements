@@ -35,5 +35,9 @@ class A(metaclass=MetaProxy):
         print(self.SOMETHING)
 
 
+# output
+# it's class A
+# it's class B
 a = A()
 a.do()
+
