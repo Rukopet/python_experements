@@ -7,8 +7,6 @@ class ProxyMetaException(Exception):
 class ProxyMeta(type):
     def __new__(cls, name, bases, dct,
                 enable_proxy: bool = True,
-                ignore_private: bool = False,
-                ignore_dunder: bool = False,
                 proxy_class_params: dict = {},
                 proxy_class: type = None,
                 **proxy_class_init_kwargs: dict):
@@ -25,10 +23,7 @@ class ProxyMeta(type):
             for attr_name, attr_value in dct.items():
                 if attr_name not in proxy_class_params.keys():
                     setattr(proxy_class_instance, attr_name, attr_value)
-                # TODO: wrong logic with ignores
-                if callable(attr_value) and \
-                    (not attr_name.startswith('__') and ignore_private and not attr_name.endswith('__')) and \
-                        (attr_name.startswith('__') and ignore_dunder and attr_name.endswith('__')):
+                if callable(attr_value):
                     dct[attr_name] = cls.create_method_wrapper(proxy_class_instance, attr_name, attr_value)
             dct['proxy_class'] = proxy_class_instance
         return super().__new__(cls, name, bases, dct)
